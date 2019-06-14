@@ -1,0 +1,6 @@
+
+## PKG_CXXFLAGS = -O3 -std=c++14 -I/usr/local/clang6/include
+##
+## -DEIGEN_DONT_VECTORIZE --> test run times with and without
+## PKG_CXXFLAGS = -Wno-ignored-attributes -DNDEBUG -O3 -Xpreprocessor -fopenmp -lomp -std=c++17
+PKG_CXXFLAGS = -g -Wall -O0 -std=c++17 -I../inst/include

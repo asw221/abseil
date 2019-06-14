@@ -1,0 +1,19 @@
+Package: abseil
+Version: 0.1
+Date: 2019-6-15
+title: Extendable Optimization
+Description: Provides exported C++ classes for general purpose optimization.
+Author: Andrew Whiteman <awhitem@umich.edu>,
+	Jian Kang <jiankang@umich.edu>
+Maintainer: Andrew Whiteman <awhitem@umich.edu>
+License: GPL (>= 2)
+Depends: R (>= 3.0.2),
+	 methods,
+	 Rcpp (>= 0.12.17),
+	 RcppEigen (>= 0.3.3.4.0)
+LinkingTo: Rcpp,
+	   RcppEigen
+Imports: numDeriv
+Suggests: devtools,
+    testthat
+RoxygenNote: 6.0.1

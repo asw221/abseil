@@ -1,0 +1,12 @@
+
+useDynLib (abseil)
+
+import (RcppEigen)
+importFrom (Rcpp, sourceCpp)
+
+## exportPattern("ˆ[[:alpha:]]+")
+export ("gr.descent", ".Seed")
+
+
+## exportClasses ()
+## exportMethods ()

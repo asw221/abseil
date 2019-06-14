@@ -1,0 +1,22 @@
+
+#include <Rcpp.h>
+
+
+
+#ifndef _UTILS_
+#define _UTILS_
+
+
+void updateTheta(Rcpp::NumericVector &theta, Rcpp::NumericVector &delta) {
+  if (theta.size() != delta.size())
+    throw (std::logic_error("updateTheta Rcpp::NumericVector dimension mismatch\n"));
+  Rcpp::NumericVector::iterator itTheta = theta.begin(), itDelta = delta.begin();
+  for (; itTheta != theta.end(); itTheta++, itDelta++)
+    (*itTheta) -= (*itDelta);
+};
+
+
+
+#endif  // _UTILS_
+
+

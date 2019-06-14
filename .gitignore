@@ -1,0 +1,31 @@
+
+# Ignore the build and lib dirs/subdirs
+build
+lib/*
+
+# Ignore any executables or shared objects
+bin/*
+
+# Ignore temporary dirs
+_tmp
+
+# Ignore temporary files
+*~
+inst/include/*~
+R/*~
+src/*~
+tests/testthat/*~
+
+
+
+
+# Mac specific
+.DS_Store
+
+# R specific
+.Rhistory
+.Rapp.history
+
+# vignette codes
+vignette/*.R
+vignette/.RData

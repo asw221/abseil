@@ -1,0 +1,11 @@
+
+useDynLib (abseil)
+
+import (RcppEigen)
+importFrom (Rcpp, sourceCpp)
+
+## exportPattern("ˆ[[:alpha:]]+")
+export ("optimizr")
+
+## exportClasses ()
+## exportMethods ()
