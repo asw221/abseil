@@ -27,7 +27,7 @@ namespace abseil {
 
   
 
-  template< typename T = double >
+  template< typename T = double, typename Derived = double >
   class AdaM
   {
   private :
@@ -35,11 +35,11 @@ namespace abseil {
     T _vt;              // current velocity
     bool _useLangevin;  // flag to adopt Langevin Dynamics
     bool _useRMS;       // flag to adopt "RMSprop" updates
-    double _eta;        // learning rate
-    double _etaScl;     // extra learning rate scaling parameter
-    double _gamma[2];   // momentum/velocity decay rates
-    double _eps;        // avoid division by zero constant
-    double _dtheta;     // || \theta^(t) - \theta^(t-1) ||^2
+    Derived _eta;        // learning rate
+    Derived _etaScl;     // extra learning rate scaling parameter
+    Derived _gamma[2];   // momentum/velocity decay rates
+    Derived _eps;        // avoid division by zero constant
+    Derived _dtheta;     // || \theta^(t) - \theta^(t-1) ||^2
     int _iter;          // current number of updates
 
     T computeDelta() const;
@@ -54,10 +54,10 @@ namespace abseil {
   public :
     AdaM(
       const T &theta,                // parameter(s) to optimize
-      const double &eta = 0.01,      // SGD learning rate, range (0, 1]
-      const double &gamma1 = 0.90,   // momentum decay rate, range (0, 1)
-      const double &gamma2 = 0.999,  // velocity decay rate, range (0, 1)
-      const double &eps = 1e-8       // small positive constant
+      const Derived &eta = 0.01,      // SGD learning rate, range (0, 1]
+      const Derived &gamma1 = 0.90,   // momentum decay rate, range (0, 1)
+      const Derived &gamma2 = 0.999,  // velocity decay rate, range (0, 1)
+      const Derived &eps = 1e-8       // small positive constant
     );
 
 
@@ -102,18 +102,18 @@ namespace abseil {
     // Simple getter methods
     const T& momentum() const;
     const T& velocity() const;
-    bool converged(const double &tol = 1e-6) const;
+    bool converged(double tol = 1e-6) const;
     int iteration() const;
-    double dtheta() const;
-    double eta() const;
+    Derived dtheta() const;
+    Derived eta() const;
 
     // Setter methods
-    void eta(const double &eta);
+    void eta(Derived eta);
   
     void clear();
     void incrementIteration();
-    void toggleLangevinDynamics(const bool &useLD = true);
-    void toggleRMSprop(const bool &useRMS = true);
+    void toggleLangevinDynamics(bool useLD = true);
+    void toggleRMSprop(bool useRMS = true);
   };
 
 

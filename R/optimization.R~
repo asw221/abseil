@@ -1,7 +1,0 @@
-
-optimizr <- function(par, fn, gr = NULL, ..., .tol = 1e-4, .max.iter = 500) {
-  if (is.null(gr))
-    gr <- function(par) numDeriv::grad(fn, par, ...)
-  .Call("optimizeFromR", par, fn, gr, .tol, .max.iter, PACKAGE = "optimizr")
-}
-

@@ -5,26 +5,9 @@ lib/*
 
 # Ignore any executables or shared objects
 bin/*
+src/*.so
+srs/*.o
 
-# Ignore temporary dirs
-_tmp
-
-# Ignore temporary files
-*~
-inst/include/*~
-R/*~
-src/*~
-tests/testthat/*~
-
-
-
-
-# Mac specific
-.DS_Store
-
-# R specific
-.Rhistory
-.Rapp.history
 
 # vignette codes
 vignette/*.R

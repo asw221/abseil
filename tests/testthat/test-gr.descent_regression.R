@@ -8,6 +8,8 @@ mse <- function(y, yhat = rep(0, length(y))) c(crossprod(y - yhat)) / length(y)
 
 test_that ("Linear regression optimization works", {
 
+  cat ("\nLinear regression example:\n")
+
   n <- 200
   P <- 20
 
@@ -53,6 +55,8 @@ test_that ("Linear regression optimization works", {
 
 test_that ("Logistic regression optimization works", {
 
+  cat ("\n\nLogistic regression example:\n")
+
   n <- 200
   P <- 5
 
@@ -92,6 +96,7 @@ test_that ("Logistic regression optimization works", {
   for (i in 1:P)
     expect_equal (unname(fit0$coefficients[i]), unname(opt$par[i]), 0.01)
 
+  cat ("\n")
   if (P <= 100)
     print (cbind(lm = coef(fit0), AdaM = opt$par))
 })
@@ -102,6 +107,8 @@ test_that ("Logistic regression optimization works", {
 
 
 test_that ("Laplace priors in logistic regression", {
+
+  cat ("\n\nLogistic-Laplace regression example:\n")
 
   n <- 200
   P <- 50
@@ -151,6 +158,7 @@ test_that ("Laplace priors in logistic regression", {
   ## for (i in 1:P)
   ##   expect_equal (unname(sign(b[i])), unname(sign(opt$par[i])))
 
+  cat ("\n")
   if (P <= 100)
     print (cbind(True = b, glm = coef(fit0), AdaM = opt$par))
 
@@ -158,13 +166,16 @@ test_that ("Laplace priors in logistic regression", {
   fit.glmnet <- glmnet::cv.glmnet(X[, -1], y, family = "binomial")
 
   data.frame(True = b, glm = coef(fit0),
-             LASSO = unname(c(as.matrix(coef(fit.lasso, s = "lambda.min")))),
+             LASSO = unname(c(as.matrix(coef(fit.glmnet, s = "lambda.min")))),
              AdaM = opt$par) %>%
     reshape2::melt("True") %>%
     ggplot(aes(True, value)) +
     geom_abline(slope = 1, intercept = 0, color = "darkgray") +
     geom_point() +
-    facet_wrap(~ variable, nrow = 1, scales = "free_y")
+    facet_wrap(~ variable, nrow = 1, scales = "free_y") ->
+    G
 
+  dev.new (units = "in", height = 2, width = 6)
+  print (G)
 })
 

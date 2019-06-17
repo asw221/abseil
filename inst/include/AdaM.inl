@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <cmath>
 #include <random>
+#include <string>
+#include <typeinfo>
+#include <type_traits>
 #include <vector>
 
 #include "extraMath.h"
@@ -36,16 +39,21 @@ using std::pow;
 
 
 // Public Methods
-// -------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
-template< typename T >
-abseil::AdaM<T>::AdaM(
+template< typename T, typename Derived >
+abseil::AdaM<T, Derived>::AdaM(
   const T &theta,
-  const double &eta,
-  const double &gamma1,
-  const double &gamma2,
-  const double &eps
+  const Derived &eta,
+  const Derived &gamma1,
+  const Derived &gamma2,
+  const Derived &eps
 ) {
+  if constexpr (!std::is_floating_point_v<Derived>) {
+      const std::string msg = "AdaM object cannot be constructed with "
+	"non-real template type Derived";
+      throw std::logic_error(msg.c_str());
+  }
   if (eta <= 0)
     throw (std::logic_error("Learning rate must be > 0"));
   if (gamma1 <= 0 || gamma1 >= 1)
@@ -72,9 +80,13 @@ abseil::AdaM<T>::AdaM(
 
 // Batch update
 // type R is the same as the type returned by the gradient function
-template< typename T >
+template< typename T, typename Derived >
 template< typename S, typename R, typename... Args >
-void abseil::AdaM<T>::update(S &theta, R gradient(const S &theta, Args&&...), Args&&... args) {
+void abseil::AdaM<T, Derived>::update(
+  S &theta,
+  R gradient(const S &theta, Args&&...),
+  Args&&... args
+) {
   T gt = std::function< R(const S&, Args&&...) >
     (gradient)(theta, std::forward<Args>(args)...);  // compute gradient
   updateMomentum(gt);
@@ -86,9 +98,9 @@ void abseil::AdaM<T>::update(S &theta, R gradient(const S &theta, Args&&...), Ar
 
 // // Minibatch update
 // // type R is the same as the type returned by the gradient function
-// template< typename T >
+// template< typename T, typename Derived >
 // template< typename S, typename R, typename... Args >
-// void abseil::AdaM<T>::minibatchUpdate(
+// void abseil::AdaM<T, Derived>::minibatchUpdate(
 //   S &theta,
 //   R unitGradient(const S &theta, const int &i, Args&&...),
 //   const int &batchSize,
@@ -126,16 +138,16 @@ void abseil::AdaM<T>::update(S &theta, R gradient(const S &theta, Args&&...), Ar
 // 'Approximate' aversion of the minibatch update
 // type R is the same as the type returned by the gradient function
 // (default is typename S)
-template< typename T >
+template< typename T, typename Derived >
 template< typename S, typename R, typename... Args >
-void abseil::AdaM<T>::minibatchUpdate(
+void abseil::AdaM<T, Derived>::minibatchUpdate(
   S &theta,
   R unitGradient(const S &theta, const int &i, Args&&...),
   const int &batchSize,
   const int &dataSize,
   Args&&... args
 ) {
-  std::uniform_int_distribution<int> UniformInteger(0, dataSize);
+  std::uniform_int_distribution<int> UniformInteger(0, dataSize - 1);
   std::function<R(const S&, const int&, Args&&...)> Grad(unitGradient);
   T gt = _mt * 0;
   for (int i = 0; i < batchSize; i++) {
@@ -147,16 +159,15 @@ void abseil::AdaM<T>::minibatchUpdate(
   updateVelocity(gt);
   updatePosition(theta);
   _iter++;
-  _iter++;
 };
 
 
 
 
 
-// template< typename T >
+// template< typename T, typename Derived >
 // template< typename S, typename R, typename... Args >
-// void abseil::AdaM<T>::virtualMinibatch(
+// void abseil::AdaM<T, Derived>::virtualMinibatch(
 //   S &theta,
 //   R unitGradient(const S&theta, const int &i, Args&&...),
 //   const int &batchSize,
@@ -188,43 +199,43 @@ void abseil::AdaM<T>::minibatchUpdate(
 // Getter methods
 // -------------------------------------------------------------------
 
-template< typename T >
-const T& abseil::AdaM<T>::momentum() const {
+template< typename T, typename Derived >
+const T& abseil::AdaM<T, Derived>::momentum() const {
   return (_mt);
 };
 
-template< typename T >
-const T& abseil::AdaM<T>::velocity() const {
+template< typename T, typename Derived >
+const T& abseil::AdaM<T, Derived>::velocity() const {
   return (_vt);
 };
 
 
-template< typename T >
-bool abseil::AdaM<T>::converged(const double &tol) const {
+template< typename T, typename Derived >
+bool abseil::AdaM<T, Derived>::converged(double tol) const {
   return (_iter > 1 && _dtheta <= tol);
 };
 
-template< typename T >
-int abseil::AdaM<T>::iteration() const {
+template< typename T, typename Derived >
+int abseil::AdaM<T, Derived>::iteration() const {
   return (_iter - 1);
 };
 
-template< typename T >
-double abseil::AdaM<T>::dtheta() const {
+template< typename T, typename Derived >
+Derived abseil::AdaM<T, Derived>::dtheta() const {
   return (_dtheta);
 };
 
 
-template< typename T >
-double abseil::AdaM<T>::eta() const {
-  double eta = _eta * _etaScl * sqrt(1 - pow(_gamma[1], _iter));
+template< typename T, typename Derived >
+Derived abseil::AdaM<T, Derived>::eta() const {
+  Derived eta = _eta * _etaScl * sqrt(1 - pow(_gamma[1], _iter));
   return (_useRMS ? eta : eta / (1 - pow(_gamma[0], _iter)));
 };
 
 
 
-template< typename T >
-void abseil::AdaM<T>::eta(const double &eta) {
+template< typename T, typename Derived >
+void abseil::AdaM<T, Derived>::eta(Derived eta) {
   _eta = eta;
 };
 
@@ -233,8 +244,8 @@ void abseil::AdaM<T>::eta(const double &eta) {
 
 
 
-template< typename T >
-void abseil::AdaM<T>::clear() {
+template< typename T, typename Derived >
+void abseil::AdaM<T, Derived>::clear() {
   _mt *= 0;
   _vt *= 0;
   _etaScl = 1.0;
@@ -245,20 +256,20 @@ void abseil::AdaM<T>::clear() {
 };
 
 
-template< typename T >
-void abseil::AdaM<T>::incrementIteration() {
+template< typename T, typename Derived >
+void abseil::AdaM<T, Derived>::incrementIteration() {
   _iter++;
 };
 
 
-template< typename T >
-void abseil::AdaM<T>::toggleLangevinDynamics(const bool &useLD) {
+template< typename T, typename Derived >
+void abseil::AdaM<T, Derived>::toggleLangevinDynamics(bool useLD) {
   _useLangevin = useLD;
 };
 
 
-template< typename T >
-void abseil::AdaM<T>::toggleRMSprop(const bool &useRMS) {
+template< typename T, typename Derived >
+void abseil::AdaM<T, Derived>::toggleRMSprop(bool useRMS) {
   _useRMS = useRMS;
 };
 
@@ -270,23 +281,28 @@ void abseil::AdaM<T>::toggleRMSprop(const bool &useRMS) {
 // Private Methods
 // -------------------------------------------------------------------
 
-template< typename T >
-T abseil::AdaM<T>::computeDelta() const {
+template< typename T, typename Derived >
+T abseil::AdaM<T, Derived>::computeDelta() const {
   T delta = eta() / (sqrt(_vt) + _eps) * _mt;
   // T scale = eta() / (sqrt(_vt) + _eps);
   // T delta = scale * _mt;
   if (_useLangevin) {
-    double scl = M_SQRT2 * eta() / _etaScl;
+    Derived scl = M_SQRT2 * eta() / _etaScl;
     if (!_useRMS)
       scl *= 1 - pow(_gamma[0], _iter);
-    delta += gaussianNoise(sqrt(scl / (sqrt(_vt) + _eps)), abseil::abseil_rng::_rng_);
+    T noise = sqrt(scl / (sqrt(_vt) + _eps));
+    gaussianNoise(noise, abseil::abseil_rng::_rng_);
+    // delta += gaussianNoise(sqrt(scl / (sqrt(_vt) + _eps)), abseil::abseil_rng::_rng_);
+    // delta += gaussianNoise<Derived>(sqrt(scl / (sqrt(_vt) + _eps)),
+    // 				    abseil::abseil_rng::_rng_);
+    delta += noise;
   }
   return (delta);
 };
 
 
-template< typename T >
-void abseil::AdaM<T>::updateMomentum(const T &gt) {
+template< typename T, typename Derived >
+void abseil::AdaM<T, Derived>::updateMomentum(const T &gt) {
   if (!_useRMS)
     _mt = _gamma[0] * _mt + (1 - _gamma[0]) * gt;
   else
@@ -294,8 +310,8 @@ void abseil::AdaM<T>::updateMomentum(const T &gt) {
 };
 
 
-template< typename T >
-void abseil::AdaM<T>::updateVelocity(const T &gt) {
+template< typename T, typename Derived >
+void abseil::AdaM<T, Derived>::updateVelocity(const T &gt) {
   _vt = _gamma[1] * _vt + (1 - _gamma[1]) * pow(gt, 2.0);
 };
 
@@ -305,9 +321,9 @@ void abseil::AdaM<T>::updateVelocity(const T &gt) {
 
 
 
-template< typename T >
+template< typename T, typename Derived >
 template< typename S >
-void abseil::AdaM<T>::updatePosition(S &theta) {
+void abseil::AdaM<T, Derived>::updatePosition(S &theta) {
   T delta = computeDelta();
   updateTheta(theta, delta);
   _dtheta = squaredNorm(delta);

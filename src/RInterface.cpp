@@ -27,24 +27,25 @@ extern "C" SEXP optimizeFromR(const SEXP par_, const SEXP objective_, const SEXP
     double currentObjective, previousObjective;
     Rcpp::NumericVector par(Rcpp::clone(par_));
   
-    abseil::AdaM<Rcpp::NumericVector> sgd(par, Rcpp::as<double>(learningRate_),
-					  Rcpp::as<double>(momentumDecay_),
-					  Rcpp::as<double>(velocityDecay_));
+    abseil::AdaM<Rcpp::NumericVector, double> gd(
+      par, Rcpp::as<double>(learningRate_),
+      Rcpp::as<double>(momentumDecay_),
+      Rcpp::as<double>(velocityDecay_));
     // sgd.toggleRMSprop(true);
   
     previousObjective = Rcpp::as<double>(objectiveFun(par));
-    while (!converged && sgd.iteration() < maxIter) {
-      sgd.update<Rcpp::NumericVector, Rcpp::NumericVector, const Rcpp::Function&>
+    while (!converged && gd.iteration() < maxIter) {
+      gd.update<Rcpp::NumericVector, Rcpp::NumericVector, const Rcpp::Function&>
 	(par, wrapRFunction, gradientFun);
       currentObjective = Rcpp::as<double>(objectiveFun(par));
       // sgd.eta(sgd.eta() * ((currentObjective <= previousObjective) ? 1.1 : 0.5));
-      converged = sgd.converged(tol) && (currentObjective <= previousObjective);
+      converged = gd.converged(tol) && (currentObjective <= previousObjective);
     }
   
     return Rcpp::wrap(Rcpp::List::create(
       Rcpp::Named("par") = par,
       Rcpp::Named("value") = currentObjective,
-      Rcpp::Named("iteration") = sgd.iteration(),
+      Rcpp::Named("iteration") = gd.iteration(),
       Rcpp::Named("convergence") = converged)
       );
   }

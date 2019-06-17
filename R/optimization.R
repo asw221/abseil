@@ -10,3 +10,9 @@ gr.descent <- function(par, fn, gr = NULL, ..., .tol = 1e-4, .max.iter = 500,
         PACKAGE = "abseil")
 }
 
+## > args(numDeriv::grad)
+## function (func, x, method = "Richardson", side = NULL, method.args = list(),
+##     ...)
+
+## l... <- list(func = fn, ...)
+## gr <- function(par, l...) do.call(numDeriv::grad, c(x = par, l...))

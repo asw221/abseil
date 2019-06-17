@@ -5,7 +5,9 @@
 
 // #include "extraMath.h"
 
-// All my shame is in this file.
+/* 
+All my shame lives in this file.
+ */
 
 
 template< typename T >
@@ -71,27 +73,55 @@ double squaredNorm(const Rcpp::NumericVector &x) {
 //   return (scl * _z(rng));
 // };
 
-Eigen::ArrayXd gaussianNoise(const Eigen::ArrayXd &scl, std::mt19937 &rng) {
-  static std::normal_distribution<double> _z(0, 1);
-  Eigen::ArrayXd noise = scl.unaryExpr([&](const double &x) {
-      return (x * _z(rng)); });
-  return (noise);
-};
-
-double gaussianNoise(const double &scl, std::mt19937 &rng) {
-  static std::normal_distribution<double> _z(0, 1);
-  return (scl * _z(rng));
-};
+// Eigen::ArrayXd gaussianNoise(const Eigen::ArrayXd &scl, std::mt19937 &rng) {
+//   static std::normal_distribution<double> _z(0, 1);
+//   Eigen::ArrayXd noise = scl.unaryExpr([&](const double &x) {
+//       return (x * _z(rng)); });
+//   return (noise);
+// };
 
 
+// Eigen::ArrayXf gaussianNoise(const Eigen::ArrayXf &scl, std::mt19937 &rng) {
+//   static std::normal_distribution<float> _z(0, 1);
+//   Eigen::ArrayXf noise = scl.unaryExpr([&](const float &x) {
+//       return (x * _z(rng)); });
+//   return (noise);
+// };
 
-Rcpp::NumericVector gaussianNoise(const Rcpp::NumericVector &scl, std::mt19937 &rng) {
-  static std::normal_distribution<double> _z(0, 1);
-  Rcpp::NumericVector noise = Rcpp::clone(scl);
-  for (int i = 0; i < noise.size(); i++)
-    noise[i] *= _z(rng);
-  return noise;
-};
+
+
+// template< typename Derived, typename RNG >
+// Eigen::ArrayBase<Derived> gaussianNoise(
+//   Eigen::ArrayBase<Derived> scl,
+//   RNG &rng) {
+//   typedef typename Derived::value_type value_type;
+//   static std::normal_distribution<value_type> _StdNormal_(0, 1);
+//   // Eigen::ArrayBase<Derived> noise(scl.size());
+//   for (int i = 0; i < scl.size(); i++)
+//     scl.coeff(i) *= _StdNormal_(rng);
+//     // noise.template operater[](i) = scl[i] * _StdNormal_(rng);
+//   // return noise;
+//   return scl;
+// };
+
+
+
+
+// double gaussianNoise(const double &scl, std::mt19937 &rng) {
+//   static std::normal_distribution<double> _z(0, 1);
+//   return (scl * _z(rng));
+// };
+
+
+
+// template< typename RealType >
+// Rcpp::NumericVector gaussianNoise(const Rcpp::NumericVector &scl, std::mt19937 &rng) {
+//   std::normal_distribution<RealType> _StdNormal_(0, 1);
+//   Rcpp::NumericVector noise = Rcpp::clone(scl);
+//   for (int i = 0; i < noise.size(); i++)
+//     noise[i] *= _StdNormal_(rng);
+//   return noise;
+// };
 
 // Eigen::VectorXd gaussianNoise(const Eigen::VectorXd &scl, std::mt19937 &rng) {
 //   static std::normal_distribution<double> _z(0, 1);
