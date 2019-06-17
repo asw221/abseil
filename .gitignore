@@ -9,6 +9,10 @@ src/*.so
 srs/*.o
 
 
+# Mac Specific
+*/.DS_Store
+
+
 # vignette codes
 vignette/*.R
 vignette/.RData
