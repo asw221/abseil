@@ -31,16 +31,16 @@ namespace abseil {
   class AdaM
   {
   private :
-    T _mt;              // current momentum
-    T _vt;              // current velocity
-    bool _useLangevin;  // flag to adopt Langevin Dynamics
-    bool _useRMS;       // flag to adopt "RMSprop" updates
+    T _mt;               // current momentum
+    T _vt;               // current velocity
+    bool _useLangevin;   // flag to adopt Langevin Dynamics
+    bool _useRMS;        // flag to adopt "RMSprop" updates
     Derived _eta;        // learning rate
     Derived _etaScl;     // extra learning rate scaling parameter
     Derived _gamma[2];   // momentum/velocity decay rates
     Derived _eps;        // avoid division by zero constant
     Derived _dtheta;     // || \theta^(t) - \theta^(t-1) ||^2
-    int _iter;          // current number of updates
+    int _iter;           // current number of updates
 
     T computeDelta() const;
     void updateMomentum(const T &gt);
@@ -52,9 +52,12 @@ namespace abseil {
 
 
   public :
+    typedef T value_type;
+    typedef Derived scalar_type;
+    
     AdaM(
-      const T &theta,                // parameter(s) to optimize
-      const Derived &eta = 0.01,      // SGD learning rate, range (0, 1]
+      const T &theta,                 // parameter(s) to optimize
+      const Derived &eta = 0.01,      // SGD learning rate, range (0, Inf)
       const Derived &gamma1 = 0.90,   // momentum decay rate, range (0, 1)
       const Derived &gamma2 = 0.999,  // velocity decay rate, range (0, 1)
       const Derived &eps = 1e-8       // small positive constant
@@ -80,7 +83,7 @@ namespace abseil {
     // Approximate version for large data sets where data indices are
     // sampled with replacement for each minibatch
     template< typename S, typename R = S, typename... Args >
-    void minibatchUpdate(
+    void minibatchUpdateApprox(
       S &theta,
       R unitGradient(const S &theta, const int &i, Args&&...),
       const int &batchSize,

@@ -98,57 +98,54 @@ void abseil::AdaM<T, Derived>::update(
 
 // // Minibatch update
 // // type R is the same as the type returned by the gradient function
-// template< typename T, typename Derived >
-// template< typename S, typename R, typename... Args >
-// void abseil::AdaM<T, Derived>::minibatchUpdate(
-//   S &theta,
-//   R unitGradient(const S &theta, const int &i, Args&&...),
-//   const int &batchSize,
-//   std::vector<int> &index,
-//   Args&&... args
-// ) {
-//   const int N = index.size();
-//   std::shuffle(index.begin(), index.end(), abseil::abseil_rng::_rng_);
-//   std::function<R(const S&, const int&, Args&&...)> Grad(unitGradient);
-//   T gt = _mt * 0;
-//   int n = 0, j = 1;
-//   for (std::vector<int>::iterator it(index.begin());
-//        it != index.end();
-//        it++, j++, n++) {
-//     // gt += std::function< R(const S&, const int&, Args&&...) >
-//     //   (unitGradient)(theta, (*it), std::forward<Args>(args)...);
-//     gt += Grad(theta, (*it), std::forward<Args>(args)...);
-//     if (j % batchSize == 0 || j == N) {
-//       // gt *= N / n;
-//       _etaScl = N / n;
-//       updateMomentum(gt);
-//       updateVelocity(gt);
-//       updatePosition(theta);
-//       gt *= 0;
-//       // _etaScl = 1.0;
-//       n = 0;
-//     }
-//   }
-//   _iter++;
-// };
-
-
-
-
-// 'Approximate' aversion of the minibatch update
-// type R is the same as the type returned by the gradient function
-// (default is typename S)
 template< typename T, typename Derived >
 template< typename S, typename R, typename... Args >
 void abseil::AdaM<T, Derived>::minibatchUpdate(
   S &theta,
   R unitGradient(const S &theta, const int &i, Args&&...),
   const int &batchSize,
+  std::vector<int> &index,
+  Args&&... args
+) {
+  const int N = index.size();
+  std::shuffle(index.begin(), index.end(), abseil::abseil_rng::_rng_);
+  std::function<R(const S&, const int&, Args&&...)> Grad(unitGradient);
+  T gt = _mt * 0;
+  int n = 0, j = 1;
+  for (std::vector<int>::iterator it(index.begin());
+       it != index.end();
+       it++, j++, n++) {
+    gt += Grad(theta, (*it), std::forward<Args>(args)...);
+    if (j % batchSize == 0 || j == N) {
+      _etaScl = N / n;
+      updateMomentum(gt);
+      updateVelocity(gt);
+      updatePosition(theta);
+      gt *= 0;
+      n = 0;
+    }
+  }
+  _iter++;
+  _etaScl = 1.0;
+};
+
+
+
+
+// 'Approximate' version of the minibatch update
+// type R is the same as the type returned by the gradient function
+// (default is typename S)
+template< typename T, typename Derived >
+template< typename S, typename R, typename... Args >
+void abseil::AdaM<T, Derived>::minibatchUpdateApprox(
+  S &theta,
+  R unitGradient(const S &theta, const int &i, Args&&...),
+  const int &batchSize,
   const int &dataSize,
   Args&&... args
 ) {
-  std::uniform_int_distribution<int> UniformInteger(0, dataSize - 1);
   std::function<R(const S&, const int&, Args&&...)> Grad(unitGradient);
+  std::uniform_int_distribution<int> UniformInteger(0, dataSize - 1);
   T gt = _mt * 0;
   for (int i = 0; i < batchSize; i++) {
     gt += Grad(theta, UniformInteger(abseil::abseil_rng::_rng_),
@@ -201,28 +198,28 @@ void abseil::AdaM<T, Derived>::minibatchUpdate(
 
 template< typename T, typename Derived >
 const T& abseil::AdaM<T, Derived>::momentum() const {
-  return (_mt);
+  return _mt;
 };
 
 template< typename T, typename Derived >
 const T& abseil::AdaM<T, Derived>::velocity() const {
-  return (_vt);
+  return _vt;
 };
 
 
 template< typename T, typename Derived >
 bool abseil::AdaM<T, Derived>::converged(double tol) const {
-  return (_iter > 1 && _dtheta <= tol);
+  return _iter > 1 && _dtheta <= tol;
 };
 
 template< typename T, typename Derived >
 int abseil::AdaM<T, Derived>::iteration() const {
-  return (_iter - 1);
+  return _iter - 1;
 };
 
 template< typename T, typename Derived >
 Derived abseil::AdaM<T, Derived>::dtheta() const {
-  return (_dtheta);
+  return _dtheta;
 };
 
 
@@ -297,7 +294,7 @@ T abseil::AdaM<T, Derived>::computeDelta() const {
     // 				    abseil::abseil_rng::_rng_);
     delta += noise;
   }
-  return (delta);
+  return delta;
 };
 
 

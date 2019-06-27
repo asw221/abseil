@@ -39,8 +39,12 @@ test_that ("Linear regression optimization works", {
                     .tol = 1e-6, .velocity.decay = 0.999)
 
 
+  ## system.time(
   opt <- gr.descent(rnorm(P), loglik, loglik.grad, .learning.rate = 0.5,
                     .tol = 1e-5, .velocity.decay = 0.999)
+  ## )
+
+  ## system.time( opt2 <- optim(rnorm(P), loglik, loglik.grad, method = "L-BFGS-B") )
 
   fit0 <- lm(y ~ X - 1)
 
@@ -117,7 +121,10 @@ test_that ("Laplace priors in logistic regression", {
   b <- rnorm(P, sd = sqrt(5))
   y <- rbinom(n, 1, plogis(X %*% b))
 
-  sig.b <- 0.8345
+  ## sig.b <- 0.8345
+  sig.b <- 0.4627564  ## > sig.b <- -log(4) / log(2 * (1 - 0.975))
+                      ## > exp(qlaplace(0.975, 0, sig))
+                      ## [1] 4
 
 
   ## qlaplace <- function(p, location = 0, scale = 1) {
@@ -149,9 +156,11 @@ test_that ("Laplace priors in logistic regression", {
 
 
   system.time(
-  opt <- gr.descent(rnorm(P), loglik, loglik.grad, .learning.rate = 1.1,
-                    .tol = 1e-6, .max.iter = 1000)
+    opt <- gr.descent(rnorm(P), loglik, loglik.grad, .learning.rate = 1.1,
+                      .tol = 1e-6, .max.iter = 1000)
   )
+
+
 
   fit0 <- glm(y ~ X - 1, family = binomial())
 
